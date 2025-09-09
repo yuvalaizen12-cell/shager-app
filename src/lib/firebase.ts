@@ -1,5 +1,5 @@
 // src/lib/firebase.ts
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   getAuth,
   setPersistence,
@@ -21,8 +21,9 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
+export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 // ודא אתחול יחיד של האפליקציה
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+
 
 // יצירת מופעים
 export const auth = getAuth(app);

@@ -1,5 +1,5 @@
 "use client";
-
+export const dynamic = "force-dynamic";
 import AdminNav from "@/components/AdminNav";
 import { useEffect, useState } from "react";
 import { InMemoryStore, seedDemoData } from "@/lib/store";

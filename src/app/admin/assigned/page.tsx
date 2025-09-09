@@ -1,5 +1,5 @@
 "use client";
-
+export const dynamic = "force-dynamic";
 import AdminNav from "@/components/AdminNav";
 import Toast from "@/components/Toast";
 import { useEffect, useState } from "react";
