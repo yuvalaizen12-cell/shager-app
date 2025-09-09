@@ -1,11 +1,8 @@
-// src/app/layout.tsx
+"use client";
 export const dynamic = "force-dynamic";
-import "./globals.css";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="he" dir="rtl">
-      <body>{children}</body>
-    </html>
-  );
+export default function AdminLayout({
+  children,
+}: { children: React.ReactNode }) {
+  return <section dir="rtl">{children}</section>;
 }
