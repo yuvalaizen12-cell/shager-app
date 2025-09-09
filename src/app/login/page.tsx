@@ -2,7 +2,8 @@
 export const dynamic = "force-dynamic";
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth } from "@/lib/auth";
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState(''); 

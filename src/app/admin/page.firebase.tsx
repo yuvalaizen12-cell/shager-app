@@ -1,12 +1,25 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { useEffect, useMemo, useState } from 'react';
-import { auth, db } from '@/lib/firebase';
+
+import { useEffect, useMemo, useState } from "react";
+import { signOut } from "firebase/auth";
 import {
-  collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, updateDoc, where, serverTimestamp
-} from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
-import Link from 'next/link';
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+  where,
+  serverTimestamp,
+} from "firebase/firestore";
+
+import { auth } from "@/lib/auth"; // ← auth מהקליינט
+import { db } from "@/lib/db";     // ← Firestore מהקליינט
+import Link from "next/link";
+
 
 type Driver = { id: string; name: string; phone: string; role: 'driver' };
 type Order = {

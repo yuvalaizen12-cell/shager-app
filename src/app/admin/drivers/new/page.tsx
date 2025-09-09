@@ -1,10 +1,15 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { useState } from 'react';
-import { auth, db } from '@/lib/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+
+import { useState } from "react";
+import { auth } from "@/lib/auth";   // ← auth מהקליינט
+import { db } from "@/lib/db";       // ← Firestore מהקליינט
+
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+
 import AdminNav from "@/components/AdminNav";
+
 
 export default function NewDriverPage() {
   const [f, setF] = useState({ name:'', phone:'', email:'', password:'' });

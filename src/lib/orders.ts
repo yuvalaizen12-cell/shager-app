@@ -1,5 +1,6 @@
 // src/lib/orders.ts
-import { db, auth } from '@/lib/firebase';
+import { auth } from "@/lib/auth";
+import { db }   from "@/lib/db";
 import {
   addDoc,
   collection,

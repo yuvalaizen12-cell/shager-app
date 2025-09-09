@@ -1,10 +1,13 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { useState } from 'react';
-import { auth, db } from '@/lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+
+import { useState } from "react";
+import { auth } from "@/lib/auth";   // ← auth מגיע מהקליינט
+import { db } from "@/lib/db";       // ← Firestore מהקליינט
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import AdminNav from "@/components/AdminNav";
+
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');

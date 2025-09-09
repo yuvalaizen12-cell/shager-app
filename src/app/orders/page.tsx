@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 
-import { auth } from '@/lib/firebase';
+import { auth } from "@/lib/auth";
 import { createOrder, listOrders, updateStatus /*, assignDriver */ } from '@/lib/orders';
 import type { Order, OrderStatus } from '@/types/order';
 

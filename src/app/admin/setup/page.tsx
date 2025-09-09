@@ -1,38 +1,45 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { auth, db } from '@/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
-import { useState } from 'react';
-import AdminNav from "@/components/AdminNav";
 
+import { useState } from "react";
+import { setUserRoleFn } from "@/lib/functions";
 
-export default function AdminSetup() {
-  const [msg, setMsg] = useState('');
+export default function SetRolePage() {
+  const [uid, setUid] = useState("");
+  const [role, setRole] = useState<"admin" | "restaurant" | "courier">("courier");
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
 
-  async function makeMeAdmin() {
-    const u = auth.currentUser;
-    if (!u) { setMsg('צריך להיות מחוברים'); return; }
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMsg(null);
+    setLoading(true);
     try {
-      await setDoc(doc(db, 'admins', u.uid), {
-        role: 'admin',
-        email: u.email ?? null,
-        createdAt: new Date().toISOString(),
-      }, { merge: true });
-      setMsg('✅ המשתמש סומן כאדמין. אפשר לחזור ל־/admin');
-    } catch (e:any) {
-      setMsg('שגיאה: ' + e.message);
+      await setUserRoleFn({ uid, role });
+      setMsg("Role נשמר בהצלחה");
+    } catch (err: any) {
+      setMsg(err?.message ?? "שגיאה בשמירת ה-Role");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <main className="p-6 max-w-md mx-auto" dir="rtl">
-      <h1 className="text-2xl font-bold mb-4">הפוך אותי לאדמין (זמני)</h1>
-      <p className="opacity-70 mb-3">
-        התחברי עם החשבון של דוד → לחצי על הכפתור כדי ליצור מסמך בקולקציית <code>admins</code>.
-        אחר כך מומלץ למחוק את הדף הזה מהקוד.
-      </p>
-      <button onClick={makeMeAdmin} className="px-4 py-2 rounded bg-green-600">הפוך אותי לאדמין</button>
-      {msg && <p className="mt-3">{msg}</p>}
-    </main>
+    <form onSubmit={onSubmit} style={{ display: "grid", gap: 12, maxWidth: 420 }}>
+      <h2>Set User Role</h2>
+      <input
+        placeholder="User UID"
+        value={uid}
+        onChange={(e) => setUid(e.target.value)}
+        required
+      />
+      <select value={role} onChange={(e) => setRole(e.target.value as any)}>
+        <option value="courier">courier</option>
+        <option value="restaurant">restaurant</option>
+        <option value="admin">admin</option>
+      </select>
+      <button disabled={loading}>{loading ? "שומר..." : "שמור Role"}</button>
+      {msg && <div>{msg}</div>}
+    </form>
   );
 }

@@ -5,7 +5,17 @@ import Toast from "@/components/Toast";
 import { useEffect, useState } from "react";
 import { InMemoryStore, seedDemoData } from "@/lib/store";
 import type { Order, Courier, Restaurant } from "@/lib/models";
+import { assignOrderFn } from "@/lib/functions";
 
+
+async function handleAssign(orderId: string, courierId: string) {
+  try {
+    await assignOrderFn({ orderId, courierId });
+    alert("ההזמנה שובצה בהצלחה");
+  } catch (e: any) {
+    alert(e?.message ?? "שגיאה בשיוך הזמנה");
+  }
+}
 // ---- קבועים/עזר ----
 const MAX_CONCURRENT = 5;
 

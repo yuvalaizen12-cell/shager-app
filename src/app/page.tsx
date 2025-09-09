@@ -1,9 +1,13 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase'; 
+
+import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+
+import { auth } from "@/lib/auth"; // ← auth מהקליינט
+import { db } from "@/lib/db";     // ← Firestore מהקליינט
+
 export default function Home() {
   const [status, setStatus] = useState<'loading' | 'no-role'>('loading');
 
