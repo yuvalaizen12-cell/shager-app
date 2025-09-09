@@ -12,6 +12,8 @@ const cards = [
   { href: "/admin/assigned",     title: "משלוחים משובצים", desc: "ניהול והחלפה/ביטול שיבוצים קיימים" },
   { href: "/admin/orders",       title: "משלוחים לא משובצים", desc: "שיבוץ לפי זמן יעד" },
   { href: "/admin/summary",      title: "סיכום יומי",      desc: "התפלגות פר מסעדה" },
+  // חדש:
+  { href: "/admin/tools",        title: "כלי אדמין",       desc: "איפוס סיסמה והקצאת תפקידים" },
 ];
 
 export default function AdminHome() {
