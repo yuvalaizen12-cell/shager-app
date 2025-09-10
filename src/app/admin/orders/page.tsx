@@ -1,8 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
-
 import { useEffect, useState } from "react";
-import AdminNav from "@/components/AdminNav";
+import AdminNav from "@/components/AdminNav"; // או AdminNavLite אם זה השם אצלך
 import { db } from "@/lib/db";
 
 type Order = {
@@ -14,6 +13,7 @@ type Order = {
 };
 
 export default function OrdersPage() {
+  console.log("✅ OrdersPage Loaded");
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,57 +22,43 @@ export default function OrdersPage() {
 
     (async () => {
       try {
-        // ייבוא דינמי – כדי לא למשוך Firestore ל-SSR
-        const {
-          collection,
-          query,
-          orderBy,
-          onSnapshot,
-        } = await import("firebase/firestore");
-
+        const { collection, query, orderBy, onSnapshot } = await import("firebase/firestore");
         const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
 
         unsub = onSnapshot(
           q,
           (snap) => {
-            const rows = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
-            setOrders(rows);
+            const list = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+            setOrders(list);
           },
-          (err) => setError(err.message)
+          (err) => setError(err.message),
         );
       } catch (e: any) {
-        setError(e.message ?? String(e));
+        setError(e.message ?? "Firestore load failed");
       }
     })();
 
-    return () => {
-      try { unsub?.(); } catch {}
-    };
+    return () => { if (unsub) unsub(); };
   }, []);
 
-  if (error) return <main dir="rtl" className="p-6">שגיאה: {error}</main>;
-  if (!orders) return <main dir="rtl" className="p-6">טוען…</main>;
-
   return (
-    <>
+    <main dir="rtl" className="p-4 space-y-4">
       <AdminNav />
-      <main dir="rtl" className="container mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-4">משלוחים לא משובצים</h1>
+      <h1 className="text-xl font-semibold">הזמנות</h1>
 
-        {orders.length === 0 ? (
-          <div className="text-sm text-gray-400">אין הזמנות.</div>
-        ) : (
-          <ul className="space-y-3">
-            {orders.map((o) => (
-              <li key={o.id} className="rounded-2xl border border-white/15 p-4">
-                <div className="text-xs text-gray-400">#{o.id}</div>
-                <div className="font-medium">{o.restaurantName ?? "ללא שם"}</div>
-                <div className="text-sm">{o.status ?? "לא ידוע"}</div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </main>
-    </>
+      {error && <div className="text-red-500">שגיאה: {error}</div>}
+      {orders === null && !error && <div>טוען…</div>}
+      {orders?.length === 0 && <div>אין הזמנות כרגע</div>}
+
+      <ul className="space-y-2">
+        {orders?.map((o) => (
+          <li key={o.id} className="border rounded p-3">
+            <div><b>ID:</b> {o.id}</div>
+            <div><b>מסעדה:</b> {o.restaurantName ?? "-"}</div>
+            <div><b>סטטוס:</b> {o.status ?? "-"}</div>
+          </li>
+        ))}
+      </ul>
+    </main>
   );
 }

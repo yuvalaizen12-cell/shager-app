@@ -1,8 +1,19 @@
-"use client";
-export const dynamic = "force-dynamic";
+import "./globals.css";
+import type { Metadata } from "next";
 
-export default function AdminLayout({
+export const metadata: Metadata = {
+  title: "Shager App",
+  description: "ניהול משלוחים",
+};
+
+export default function RootLayout({
   children,
-}: { children: React.ReactNode }) {
-  return <section dir="rtl">{children}</section>;
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="he" dir="rtl">
+      <body>{children}</body>
+    </html>
+  );
 }

@@ -1,21 +1,18 @@
+
 // src/lib/auth.ts
-"use client";
-import { app } from "./firebase";
-import {
-  getAuth,
-  setPersistence,
-  browserLocalPersistence,
-  connectAuthEmulator,
-} from "firebase/auth";
+import type { Auth } from "firebase/auth";
+import { app } from "./firebaseApp";
 
-export const auth = getAuth(app);
+let _auth: Auth | null = null;
 
-// השארת משתמש מחובר (לא לחסום שגיאות)
-void setPersistence(auth, browserLocalPersistence).catch(() => {});
+export async function getClientAuth(): Promise<Auth> {
+  if (typeof window === "undefined") {
+    throw new Error("getClientAuth must be called in the browser");
+  }
+  if (_auth) return _auth;
 
-// אמולטור בזמן פיתוח בלבד
-if (process.env.NEXT_PUBLIC_USE_EMULATOR === "1" && typeof window !== "undefined") {
-  try {
-    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-  } catch {}
+  const { getAuth, browserLocalPersistence, setPersistence } = await import("firebase/auth");
+  _auth = getAuth(app);
+  await setPersistence(_auth, browserLocalPersistence);
+  return _auth;
 }

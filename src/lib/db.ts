@@ -1,13 +1,30 @@
 // src/lib/db.ts
-"use client";
-import { app } from "./firebase";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import type { Firestore } from "firebase/firestore";
+import { app } from "./firebaseApp";
 
-export const db = getFirestore(app);
+let _db: Firestore | null = null;
 
-// אמולטור בזמן פיתוח בלבד
-if (process.env.NEXT_PUBLIC_USE_EMULATOR === "1" && typeof window !== "undefined") {
-  try {
-    connectFirestoreEmulator(db, "127.0.0.1", 8080);
-  } catch {}
+export async function getClientDb(): Promise<Firestore> {
+  if (typeof window === "undefined") {
+    throw new Error("getClientDb must be called in the browser");
+  }
+  if (_db) return _db;
+
+  const {
+    initializeFirestore,
+    persistentLocalCache,
+    persistentMultipleTabManager,
+    CACHE_SIZE_UNLIMITED,
+  } = await import("firebase/firestore");
+
+  _db = initializeFirestore(app, {
+    experimentalAutoDetectLongPolling: true, // ← מספיק
+    // experimentalForceLongPolling: true,   // ← אם עדיין יש חסימות רשת, אפשר להחליף לזה
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager(),
+      cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+    }),
+  });
+
+  return _db;
 }
