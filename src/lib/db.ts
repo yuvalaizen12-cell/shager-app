@@ -18,8 +18,7 @@ export async function getClientDb(): Promise<Firestore> {
   } = await import("firebase/firestore");
 
   _db = initializeFirestore(app, {
-    experimentalAutoDetectLongPolling: true, // ← מספיק
-    // experimentalForceLongPolling: true,   // ← אם עדיין יש חסימות רשת, אפשר להחליף לזה
+    experimentalAutoDetectLongPolling: true,
     localCache: persistentLocalCache({
       tabManager: persistentMultipleTabManager(),
       cacheSizeBytes: CACHE_SIZE_UNLIMITED,

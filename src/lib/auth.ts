@@ -1,4 +1,3 @@
-
 // src/lib/auth.ts
 import type { Auth } from "firebase/auth";
 import { app } from "./firebaseApp";
@@ -11,7 +10,7 @@ export async function getClientAuth(): Promise<Auth> {
   }
   if (_auth) return _auth;
 
-  const { getAuth, browserLocalPersistence, setPersistence } = await import("firebase/auth");
+  const { getAuth, setPersistence, browserLocalPersistence } = await import("firebase/auth");
   _auth = getAuth(app);
   await setPersistence(_auth, browserLocalPersistence);
   return _auth;

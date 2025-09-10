@@ -1,4 +1,4 @@
-
+// src/lib/firebaseApp.ts
 import { initializeApp, getApps, getApp } from "firebase/app";
 
 const firebaseConfig = {
