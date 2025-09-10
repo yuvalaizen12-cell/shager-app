@@ -8,30 +8,36 @@ import { getClientAuth } from "@/lib/auth";
 import { getClientDb } from "@/lib/db";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const [state, setState] = useState<"checking" | "allow" | "redirect">("checking");
   const r = useRouter();
-  const [ok, setOk] = useState(false);
 
   useEffect(() => {
     let unsub: undefined | (() => void);
-
     (async () => {
-      const auth = await getClientAuth();
-      const db = await getClientDb();
+      try {
+        const auth = await getClientAuth();
+        const db = await getClientDb();
+        const { onAuthStateChanged } = await import("firebase/auth");
+        const { doc, getDoc } = await import("firebase/firestore");
 
-      const { onAuthStateChanged } = await import("firebase/auth");
-      const { doc, getDoc } = await import("firebase/firestore");
-
-      unsub = onAuthStateChanged(auth, async (u) => {
-        if (!u) return r.replace("/admin/login");
-        const snap = await getDoc(doc(db, "admins", u.uid));
-        if (!snap.exists()) return r.replace("/admin/login");
-        setOk(true);
-      });
+        unsub = onAuthStateChanged(auth, async (u) => {
+          if (!u) { setState("redirect"); r.replace("/admin/login"); return; }
+          const snap = await getDoc(doc(db, "admins", u.uid));
+          if (!snap.exists() || (snap.data() as any).role !== "admin") {
+            setState("redirect"); r.replace("/admin/login"); return;
+          }
+          setState("allow");
+        });
+      } catch (e) {
+        console.error("Auth check failed:", e);
+        setState("redirect");
+        r.replace("/admin/login");
+      }
     })();
-
     return () => { if (unsub) unsub(); };
   }, [r]);
 
-  if (!ok) return null; // או ספינר קטן
+  if (state === "checking")  return <main className="p-6 text-center">בודק הרשאות…</main>;
+  if (state === "redirect")  return <main className="p-6 text-center">מפנה להתחברות…</main>;
   return <>{children}</>;
 }
