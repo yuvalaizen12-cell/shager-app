@@ -1,64 +1,41 @@
 "use client";
-export const dynamic = "force-dynamic";
-
-import { useState, type FormEvent } from "react";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/db"; // וודאי שיש src/lib/db.ts כמו שהכנת
+import { useState } from "react";
+import { getClientAuth } from "@/lib/auth";            // ← במקום auth
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 
 export default function CourierLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function login(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
-      const cred = await signInWithEmailAndPassword(auth, email, password);
-
-      // בדיקת פרופיל/תפקיד בשליחים
-      const prof = await getDoc(doc(db, "drivers", cred.user.uid));
-      if (!prof.exists() || (prof.data() as any).role !== "driver") {
-        alert("המשתמש לא מוגדר כשליח.");
-        return;
-      }
-
+      const auth = getClientAuth();                   // ← נקרא בצד לקוח
+      await signInWithEmailAndPassword(auth, email, password);
       window.location.href = "/courier";
-    } catch (e: any) {
-      alert(e?.message ?? "Login failed");
+    } catch (err: any) {
+      alert(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={login} style={{ maxWidth: 360, margin: "64px auto" }}>
-      <h1>התחברות שליח</h1>
-      <div style={{ marginBottom: 12 }}>
-        <label>אימייל</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{ width: "100%" }}
-        />
-      </div>
-      <div style={{ marginBottom: 12 }}>
-        <label>סיסמה</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{ width: "100%" }}
-        />
-      </div>
-      <button type="submit" disabled={loading}>
-        {loading ? "מתחבר..." : "התחבר"}
-      </button>
-    </form>
+    <main dir="rtl" className="p-6 max-w-md mx-auto">
+      <h1 className="text-2xl font-bold mb-4">התחברות שליח</h1>
+      <form onSubmit={onSubmit} className="space-y-3">
+        <input className="w-full p-2 rounded bg-black/90 text-white border border-white/20 text-right"
+               type="email" placeholder="אימייל"
+               value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input className="w-full p-2 rounded bg-black/90 text-white border border-white/20 text-right"
+               type="password" placeholder="סיסמה"
+               value={password} onChange={(e) => setPassword(e.target.value)} />
+        <button className="px-4 py-2 rounded bg-blue-600" disabled={loading}>
+          {loading ? "מתחבר…" : "התחבר"}
+        </button>
+      </form>
+    </main>
   );
 }

@@ -1,30 +1,36 @@
 'use client';
+import { useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 
-export default function RequireRole({
-  need, // 'admin' | 'courier' | 'restaurant' | undefined
-  children,
-}: {
-  need?: 'admin' | 'courier' | 'restaurant';
+type Props = {
+  role: 'admin' | 'courier' | 'driver' | string;
   children: React.ReactNode;
-}) {
-  const { user, role, loading } = useAuth();
+  fallbackPath?: string;
+};
 
-  if (loading) return <main className="p-6">טוען…</main>;
+export default function RequireRole({ role, children, fallbackPath = '/admin/login' }: Props) {
+  const { user, role: myRole, loading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  if (!user) {
-    if (typeof window !== 'undefined') {
-      window.location.href = need ? `/${need}/login` : '/courier/login';
+  useEffect(() => {
+    if (loading) return;
+
+    // לא מחוברת? – שלחי ללוגאין
+    if (!user) {
+      if (pathname !== fallbackPath) router.replace(fallbackPath);
+      return;
     }
-    return null;
-  }
 
-  if (need && role !== need) {
-    if (typeof window !== 'undefined') {
-      window.location.href = `/${role ?? 'courier'}/login`;
+    // מחוברת אבל ללא תפקיד מתאים? – שלחי ללוגאין המתאים
+    if (myRole !== role) {
+      router.replace(fallbackPath);
     }
-    return null;
-  }
+  }, [user, myRole, loading, router, pathname, fallbackPath, role]);
+
+  if (loading) return <div className="p-6 text-center">טוען…</div>;
+  if (!user || myRole !== role) return null; // בזמן הניווט
 
   return <>{children}</>;
 }

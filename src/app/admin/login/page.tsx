@@ -1,48 +1,72 @@
-// src/app/admin/login/page.tsx
-"use client";
-export const dynamic = "force-dynamic";
+'use client';
+export const dynamic = 'force-dynamic';
 
-import { useState } from "react";
-import { getClientAuth } from "@/lib/auth";
-import { getClientDb }   from "@/lib/db";
+import { useEffect, useState } from 'react';
+import { getClientAuth } from '@/lib/auth';            // ה־auth מהקליינט (wrapper)
+import { getClientDb } from '@/lib/db';                // ה־db מהקליינט (wrapper)
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { useAuth } from '@/components/AuthProvider';
+import { useRouter } from 'next/navigation';
 
-export default function AdminLogin() {
-  const [email, setEmail] = useState("");
-  const [password, setPw] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+export default function AdminLoginPage() {
+  const router = useRouter();
+  const { user, role, loading } = useAuth();
 
-  async function login(e: React.FormEvent) {
-    e.preventDefault(); setLoading(true); setErr(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  // אם כבר מחוברת כאדמין — נווטי פנימה
+  useEffect(() => {
+    if (!loading && user && role === 'admin') {
+      router.replace('/admin');
+    }
+  }, [user, role, loading, router]);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
     try {
-      const auth = await getClientAuth();
-      const db   = await getClientDb();
-      const { signInWithEmailAndPassword, signOut } = await import("firebase/auth");
-      const { doc, getDoc } = await import("firebase/firestore");
+      const auth = getClientAuth();
+      const db = getClientDb();
 
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      const snap = await getDoc(doc(db, "admins", cred.user.uid));
-      if (!snap.exists() || (snap.data() as any).role !== "admin") {
-        await signOut(auth);
-        setErr("אין לך הרשאות אדמין."); return;
+      const snap = await getDoc(doc(db, 'admins', cred.user.uid));
+      if (!snap.exists()) {
+        alert('אין הרשאות אדמין');
+        return;
       }
-      location.href = "/admin";
-    } catch (e:any) {
-      setErr(e?.message ?? "שגיאת התחברות");
-    } finally { setLoading(false); }
+      // הצלחה
+      router.replace('/admin');
+    } catch (err: any) {
+      alert(err.message ?? 'Login failed');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
-    <main className="min-h-screen p-6 max-w-md mx-auto bg-neutral-900 text-white" dir="rtl">
-      <h1 className="text-2xl font-bold mb-4">התחברות אדמין</h1>
-      <form onSubmit={login} className="space-y-3">
-        <input className="w-full p-2 rounded bg-black/60 border border-white/20 text-right"
-               placeholder="אימייל" type="email" value={email} onChange={e=>setEmail(e.target.value)} />
-        <input className="w-full p-2 rounded bg-black/60 border border-white/20 text-right"
-               placeholder="סיסמה" type="password" value={password} onChange={e=>setPw(e.target.value)} />
-        {err && <div className="text-red-400 text-sm">{err}</div>}
-        <button className="px-4 py-2 rounded bg-blue-600" disabled={loading}>
-          {loading ? "מתחבר…" : "כניסה"}
+    <main dir="rtl" className="p-6 max-w-md mx-auto">
+      <h1 className="text-2xl font-bold mb-6">התחברות אדמין</h1>
+
+      <form onSubmit={onSubmit} className="space-y-3">
+        <input
+          type="email"
+          className="w-full p-2 rounded bg-black/90 text-white border border-white/20 text-right"
+          placeholder="אימייל"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          className="w-full p-2 rounded bg-black/90 text-white border border-white/20 text-right"
+          placeholder="סיסמה"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+        />
+        <button className="px-4 py-2 rounded bg-blue-600" disabled={submitting}>
+          {submitting ? 'מתחבר…' : 'כניסה'}
         </button>
       </form>
     </main>

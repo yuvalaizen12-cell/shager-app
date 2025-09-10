@@ -1,13 +1,13 @@
-"use client";
+// src/app/admin/layout.tsx
 export const dynamic = "force-dynamic";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getClientAuth } from "@/lib/auth";
-import { getClientDb } from "@/lib/db";
-import RequireRole from '@/components/RequireRole';
-import AdminNav from '@/components/AdminNav';
 
+import AdminNav from "@/components/AdminNav";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <RequireRole need="admin">{children}</RequireRole>;
+  return (
+    <main dir="rtl" className="p-4">
+      <AdminNav />
+      {children}
+    </main>
+  );
 }
