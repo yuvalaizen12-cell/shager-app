@@ -1,17 +1,17 @@
 // src/lib/auth.ts
-import type { Auth } from "firebase/auth";
-import { app } from "./firebaseApp";
+'use client';
+import { getApps, getApp, initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 
-let _auth: Auth | null = null;
+const firebaseApp = getApps().length ? getApp() : initializeApp({
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+});
 
-export async function getClientAuth(): Promise<Auth> {
-  if (typeof window === "undefined") {
-    throw new Error("getClientAuth must be called in the browser");
-  }
-  if (_auth) return _auth;
-
-  const { getAuth, setPersistence, browserLocalPersistence } = await import("firebase/auth");
-  _auth = getAuth(app);
-  await setPersistence(_auth, browserLocalPersistence);
-  return _auth;
+export function getClientAuth() {
+  return getAuth(firebaseApp);
 }

@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogoutButton } from '@/components/LogoutButton';
 
 const items = [
   { href: "/admin", label: "מנהל — דשבורד" },
@@ -40,6 +41,16 @@ export default function AdminNav() {
                 </li>
               );
             })}
+            return (
+                 <nav className="p-3 flex items-center gap-3 border-b border-white/10">
+                    <Link href="/admin">דשבורד</Link>
+                    <Link href="/admin/orders">הזמנות</Link>
+                       <div className="ml-auto">
+                         <LogoutButton />
+                       </div>
+                   </nav>
+                  );
+
 
             {/* צ'יפ מידע קטן בצד ימין - מציג את העמוד הפעיל */}
             <li className="ml-auto hidden md:block">

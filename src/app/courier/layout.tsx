@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import { getClientAuth } from "@/lib/auth";
 import { getClientDb } from "@/lib/db";
 import RequireRole from '@/components/RequireRole';
-import AdminNav from '@/components/AdminNav';
 
-
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <RequireRole need="admin">{children}</RequireRole>;
+export default function CourierLayout({ children }: { children: React.ReactNode }) {
+  return <RequireRole need="courier">{children}</RequireRole>;
 }
+

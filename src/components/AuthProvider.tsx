@@ -1,49 +1,69 @@
-// src/components/AuthProvider.tsx
-"use client";
+'use client';
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/lib/auth";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { getClientAuth } from '@/lib/auth';
+import { getClientDb } from '@/lib/db';
+import { doc, getDoc } from 'firebase/firestore';
 
-type Role = "admin" | "restaurant" | "courier" | null;
+// תפקיד המשתמש במערכת
+type Role = 'admin' | 'courier' | 'restaurant' | null;
 
-type AuthState = {
+type AuthCtx = {
   user: User | null;
-  token: string | null;
   role: Role;
   loading: boolean;
 };
 
-const AuthContext = createContext<AuthState>({
+const AuthContext = createContext<AuthCtx>({
   user: null,
-  token: null,
   role: null,
   loading: true,
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AuthState>({
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<AuthCtx>({
     user: null,
-    token: null,
     role: null,
     loading: true,
   });
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        setState({ user: null, token: null, role: null, loading: false });
+    const auth = getClientAuth();
+    const db = getClientDb();
+
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      if (!u) {
+        setState({ user: null, role: null, loading: false });
         return;
       }
-      const token = await user.getIdToken(true);
-      const { claims } = await user.getIdTokenResult();
-      const role = (claims.role as Role) ?? null;
-      setState({ user, token, role, loading: false });
+
+      // בדיקת תפקיד: קודם admins/{uid}, אחרת users/{uid}.role
+      let role: Role = null;
+
+      const adminSnap = await getDoc(doc(db, 'admins', u.uid));
+      if (adminSnap.exists()) {
+        role = 'admin';
+      } else {
+        const userSnap = await getDoc(doc(db, 'users', u.uid));
+        if (userSnap.exists()) role = (userSnap.data() as any).role ?? null;
+      }
+
+      setState({ user: u, role, loading: false });
     });
+
     return () => unsub();
   }, []);
 
-  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={state}>{children}</AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => useContext(AuthContext);
